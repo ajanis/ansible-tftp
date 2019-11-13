@@ -11,3 +11,6 @@ tftp_syslinux_binary:
   - /usr/share/syslinux/gpxelinux.0
   - /usr/share/syslinux/menu.c32
   - /usr/share/syslinux/chain.c32
+  - /usr/share/ipxe/undionly.kpxe
+  - /usr/share/ipxe/ipxe.efi
+  - /usr/share/ipxe/ipxe.lkrn

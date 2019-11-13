@@ -7,8 +7,7 @@ tftp_pkg:
 tftp_service: tftpd-hpa
 
 tftp_syslinux_binary:
-  - /usr/lib/syslinux/pxelinux.0
-  - /usr/lib/syslinux/gpxelinux.0
+  - /usr/lib/PXELINUX/pxelinux.0
   - /usr/lib/syslinux/modules/bios/menu.c32
   - /usr/lib/syslinux/modules/bios/chain.c32
   - /usr/lib/ipxe/undionly.kpxe
