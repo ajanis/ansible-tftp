@@ -4,6 +4,9 @@
 
 - Requirements
 - Role Variables
+  - defaults/main.yml
+  - vars/Debian|Ubuntu
+  - vars/RedHat
 - Dependencies
 - Example Group Variables
 - Example Playbook
@@ -21,7 +24,8 @@ This role is part of a project that will configure a Foreman build environment w
 N/A
 
 ## Role Variables
-```
+#### defaults/main.yml
+```yaml
 tftp_user: tftp
 tftp_group: tftp
 
@@ -42,6 +46,42 @@ tftp_xinetd_server: /usr/sbin/in.tftpd
 tftp_xinetd_server_args: "--user {{ tftp_user }} --secure {{ tftp_dir }}"
 tftp_xinetd_disable: "no"
 ```
+#### vars/Debian|Ubuntu
+```yaml
+tftp_pkg:
+  - tftpd-hpa
+  - syslinux
+  - pxelinux
+
+tftp_service: tftpd-hpa
+
+tftp_syslinux_binary:
+  - /usr/lib/PXELINUX/pxelinux.0
+  - /usr/lib/PXELINUX/gpxelinux.0
+  - /usr/lib/syslinux/modules/bios/menu.c32
+  - /usr/lib/syslinux/modules/bios/chain.c32
+  - /usr/lib/ipxe/undionly.kpxe
+  - /usr/lib/ipxe/ipxe.efi
+  - /usr/lib/ipxe/ipxe.lkrn
+```
+#### vars/RedHat
+```yaml
+tftp_pkg:
+  - tftp-server
+  - xinetd
+  - syslinux
+
+tftp_service: xinetd
+
+tftp_syslinux_binary:
+  - /usr/share/syslinux/pxelinux.0
+  - /usr/share/syslinux/gpxelinux.0
+  - /usr/share/syslinux/menu.c32
+  - /usr/share/syslinux/chain.c32
+  - /usr/share/ipxe/undionly.kpxe
+  - /usr/share/ipxe/ipxe.efi
+  - /usr/share/ipxe/ipxe.lkrn
+```
 
 ## Dependencies
 
@@ -49,7 +89,7 @@ Additonal variables may be set in group_vars for configuring Foreman, nginx, isc
 
 
 ## Example Group Variables
-```
+```yaml
 www_domain: home.example.com
 foreman_hostname: foreman
 
@@ -72,43 +112,122 @@ nginx_vhosts:
         docroot: "/usr/share/nginx/html"
       - name: 50x.html
         docroot: "/usr/share/nginx/html"
+```
 
-isc_dhcp_server_subnet:
-  - netaddress: 192.168.121.0
-    netmask: 255.255.255.0
-    gateway: 192.168.121.1
-    domain: "{{ www_domain | default(ansible_domain) }}"
-    domain_search: "{{ www_domain | default(ansible_domain) }}"
-    dns: 192.168.121.1
-    range: 192.168.121.20 192.168.121.100
+**PROTIP!!** If deploying isc-dhcp-server as part of foreman setup, use ```foreman_proxy_dhcp_subnets``` in your group_vars to configure both isc-dhcp-server and foreman DHCP smart-proxy.
+
+```yaml
+foreman_proxy_dhcp_subnets:
+  - name: "10.0.10.0/24"
+    network: "10.0.10.0"
+    mask: "255.255.255.0"
+    gateway: "10.0.10.1"
+    from_ip: "10.0.10.240"
+    to_ip: "10.0.10.250"
+    vlanid:
+    mtu: 9000
+    domains:
+    - "{{ www_domain }}"
+    dns_primary: 10.0.10.1
+    dns_secondary:
 ```
 
 ## Example Playbook
-```
+```yaml
 - name: "Deploy Foreman Server"
-  hosts: foreman
-  become: True
+  hosts: all
   remote_user: root
   tasks:
 
+    - setup:
+    - include_role:
+        name: common
+      tags:
+        - common
+
+    - include_role:
+        name: isc_dhcp_server
+        public: yes
+        apply:
+          tags:
+            - dhcp
+      when: foreman_proxy_dhcp
+      tags:
+        - dhcp
+
+    - include_role:
+        name: tftp
+        public: yes
+        apply:
+          tags:
+            - tftp
+      when: foreman_proxy_tftp
+      tags:
+        - tftp
+
+    - include_role:
+        name: nginx
+        public: yes
+        apply:
+          tags:
+            - nginx
+      tags:
+        - nginx
+
+    - include_role:
+        name: awx
+        public: yes
+        apply:
+          tags:
+            - awx
+      tags:
+        - awx
+
+    - include_role:
+        name: docker
+        public: yes
+        apply:
+          tags:
+            - docker
+      tags:
+        - docker
+
+    - include_role:
+        name: awx
+        tasks_from: update_ca.yml
+        public: yes
+        apply:
+          tags:
+            - awx
+      tags:
+        - awx
 
     - include_role:
         name: foreman
+        public: yes
       tags:
         - install
         - configure
         - foreman
-  
-    - include_role:
-        name: nginx
-  
-    - include_role:
-        name: isc_dhcp_server
-      when: foreman_proxy_dhcp
+        - smartproxy
 
     - include_role:
-        name: tftp
-      when: foreman_proxy_tftp
+        name: foreman
+        public: yes
+        tasks_from: customize_config.yml
+        apply:
+          tags:
+            - customize
+      tags:
+        - customize
+
+    - include_role:
+        name: foreman
+        public: yes
+        tasks_from: host-build.yml
+      tags:
+        - hostcreate
+        - hostcleanup
 ```
 
 ## License
