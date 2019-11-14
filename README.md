@@ -135,11 +135,19 @@ foreman_proxy_dhcp_subnets:
 ## Example Playbook
 ```yaml
 - name: "Deploy Foreman Server"
-  hosts: all
+  hosts: buildhost
   remote_user: root
+  vars_files:
+    - vault.yml
   tasks:
 
-    - setup:
+    - name: Wait for server to come online
+      wait_for_connection:
+        delay: 60
+        sleep: 10
+        connect_timeout: 5
+        timeout: 900
+
     - include_role:
         name: common
       tags:
@@ -194,7 +202,7 @@ foreman_proxy_dhcp_subnets:
 
     - include_role:
         name: awx
-        tasks_from: update_ca.yml
+        tasks_from: container-tasks.yml
         public: yes
         apply:
           tags:
@@ -210,24 +218,16 @@ foreman_proxy_dhcp_subnets:
         - configure
         - foreman
         - smartproxy
-
-    - include_role:
-        name: foreman
-        public: yes
-        tasks_from: customize_config.yml
-        apply:
-          tags:
-            - customize
-      tags:
         - customize
 
     - include_role:
-        name: foreman
+        name: ansible-project
         public: yes
-        tasks_from: host-build.yml
       tags:
-        - hostcreate
-        - hostcleanup
+        - never
+        - project
+        - projectimport
+        - projectclone
 ```
 
 ## License
