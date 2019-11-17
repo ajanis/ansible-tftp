@@ -15,3 +15,6 @@ tftp_syslinux_binary:
   - /usr/lib/ipxe/undionly.kpxe
   - /usr/lib/ipxe/ipxe.efi
   - /usr/lib/ipxe/ipxe.lkrn
+  - /usr/lib/syslinux/modules/bios/ldlinux.c32
+  - /usr/lib/syslinux/modules/bios/libutil.c32
+  - /usr/lib/syslinux/modules/bios/libcom.c32
