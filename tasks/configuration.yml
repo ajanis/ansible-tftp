@@ -45,14 +45,14 @@
     - restart tftp
   when: ansible_os_family == "Debian"
 
-- name: template xinetd tftp config
-  template:
-    src: xinetd_tftp.j2
-    dest: /etc/xinetd.d/tftp
-    backup: yes
-  notify:
-    - restart tftp
-  when: ansible_os_family == "RedHat"
+#- name: template xinetd tftp config
+#  template:
+#    src: xinetd_tftp.j2
+#    dest: /etc/xinetd.d/tftp
+#    backup: yes
+#  notify:
+#    - restart tftp
+#  when: ansible_os_family == "RedHat"
 
 - name: start tftp service
   service:
