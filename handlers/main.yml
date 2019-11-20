@@ -1,5 +1,5 @@
 ---
 - name: restart tftp
   service:
-    name="{{ tftp_service }}"
-    state=restarted
+    name: tftpd-hpa
+    state: restarted
