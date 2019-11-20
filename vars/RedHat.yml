@@ -17,3 +17,13 @@ tftp_syslinux_binary:
   - /usr/share/syslinux/ldlinux.c32
   - /usr/share/syslinux/libutil.c32
   - /usr/share/syslinux/libcom.c32
+
+
+
+tftp_xinetd_socket_type: "dgram"
+tftp_xinetd_protocol: "udp"
+tftp_xinetd_wait: "yes"
+tftp_xinetd_service_user: "root"
+tftp_xinetd_server: "/usr/sbin/in.tftpd"
+tftp_xinetd_server_args: "-c -s /tftpboot"
+tftp_xinetd_disable: "no"
