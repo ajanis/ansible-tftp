@@ -5,6 +5,6 @@
     state: present
 
 - name: enable tftp service
-  service:
+  systemd:
     name: "{{ tftp_service }}"
     enabled: yes

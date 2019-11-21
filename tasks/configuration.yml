@@ -41,8 +41,7 @@
     src: default_tftpd_hpa.j2
     dest: /etc/default/tftpd-hpa
     backup: yes
-  notify:
-    - restart tftp
+  register: tftpd_config_copy
   when: ansible_os_family == "Debian"
 
 - name: template xinetd tftp config
@@ -50,11 +49,31 @@
     src: xinetd_tftp.j2
     dest: /etc/xinetd.d/tftp
     backup: yes
-  notify:
-    - restart tftp
+  register: tftpd_config_copy
   when: ansible_os_family == "RedHat"
 
-- name: start tftp service
-  service:
-    name: "{{ tftp_service }}"
-    state: started
+- name: Restart the tftpd service
+  systemd:
+    name: tftpd-hpa
+    state: restarted
+    enabled: yes
+  register: tftpd_hpa_restarted
+  when: tftpd_config_copy is changed
+
+- name: Verify the tftpd service is listening
+  wait_for:
+    host: "{{ tftp_hpa_address.split(':')[0] }}"
+    port: "{{ tftp_hpa_address.split(':')[1]"
+    delay: 5
+  when: tftpd_hpa_restarted is changed
+  ignore_errors: yes
+  register: tftpd_start_attempt
+
+- name: Get tftpd journald logs if service does not appear to be up
+  shell: journalctl _SYSTEMD_INVOCATION_ID=`systemctl show -p InvocationID --value tftpd-hpa.service`
+  register: tftpd_hpa_journal
+  when: tftpd_start_attempt.failed is defined and tftpd_start_attempt.failed == True
+
+- fail:
+    msg: "{{ tftpd_hpa_journal.stdout_lines }}"
+  when: tftpd_start_attempt.failed is defined and tftpd_start_attempt.failed == True
