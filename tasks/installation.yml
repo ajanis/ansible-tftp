@@ -1,10 +1,28 @@
 ---
-- name: install tftp
+
+- name: Create TFTP system group
+  group:
+    name: "{{ tftp_group }}"
+    system: yes
+    state: present
+
+- name: Create TFTP system user
+  user:
+    name: "{{ tftp_user }}"
+    group: "{{ tftp_group }}"
+    system: yes
+    createhome: no
+    password: !
+    shell: /bin/false
+    state: present
+
+- name: "Install {{ tftp_pkg }}"
   package:
     name: "{{ tftp_pkg }}"
     state: present
 
-- name: enable tftp service
+- name: Enable TFTP Server
   systemd:
     name: "{{ tftp_service }}"
     enabled: yes
+    daemon_reload: yes

@@ -1,25 +1,18 @@
 ---
-- name: add tftp group
-  group:
-    name: "{{ tftp_group }}"
-    system: yes
-    state: present
-
-- name: add tftp user
-  user:
-    name: "{{ tftp_user }}"
-    group: "{{ tftp_group }}"
-    system: yes
-    createhome: no
-    password: !
-    shell: /bin/false
-    state: present
+- name: template tftpd-hpa config
+  template:
+    src: default_tftpd_hpa.j2
+    dest: /etc/default/tftpd-hpa
+    backup: yes
+  notify: restart tftp
+  when: ansible_os_family == "Debian"
 
 - name: create tftp directory
   file:
     path: "{{ tftp_dir }}"
     mode: 0755
     state: directory
+  notify: restart tftp
 
 - name: create tftp pxe directories
   file:
@@ -27,6 +20,7 @@
     mode: 0755
     state: directory
   with_items: "{{ tftp_pxe_dir }}"
+  notify: restart tftp
 
 - name: copy syslinux binaries to tftp directory
   copy:
@@ -35,30 +29,27 @@
     remote_src: yes
     mode: 0644
   with_items: "{{ tftp_syslinux_binary }}"
+  notify: restart tftp
 
-- name: template tftpd-hpa config
+- name: template xinetd tftp config
   template:
-    src: default_tftpd_hpa.j2
-    dest: /etc/default/tftpd-hpa
+    src: xinetd_tftp.j2
+    dest: /etc/xinetd.d/tftp
     backup: yes
-  register: tftpd_config_copy
-  when: ansible_os_family == "Debian"
+  notify: restart tftp
+  when: ansible_os_family == "RedHat"
 
-#- name: template xinetd tftp config
-#  template:
-#    src: xinetd_tftp.j2
-#    dest: /etc/xinetd.d/tftp
-#    backup: yes
-#  register: xinetd_config_copy
-#  when: ansible_os_family == "RedHat"
+- meta: flush_handlers
+
 
 - name: Restart the tftpd service
   systemd:
-    name: tftpd-hpa
+    name: "{{ tftp_service }"
     state: restarted
     enabled: yes
   register: tftpd_hpa_restarted
-  when: tftpd_config_copy is changed
+  when: tftpd_require_restart | default(false)
+
 
 - name: Verify the tftpd service is listening
   shell: nmap -sU -p 69 0.0.0.0 | grep -q open
@@ -70,10 +61,10 @@
   delay: 5
 
 - name: Get tftpd journald logs if service does not appear to be up
-  shell: journalctl _SYSTEMD_INVOCATION_ID=`systemctl show -p InvocationID --value tftpd-hpa.service`
+  shell: journalctl _SYSTEMD_INVOCATION_ID=`systemctl show -p InvocationID --value {{ tftp_service }}.service`
   register: tftpd_hpa_journal
-  when: tftpd_start_attempt.failed is defined and tftpd_start_attempt.failed == True
+  when: tftpd_start_attempt.failed | default(false)
 
 - fail:
     msg: "{{ tftpd_hpa_journal.stdout_lines }}"
-  when: tftpd_start_attempt.failed is defined and tftpd_start_attempt.failed == True
+  when: tftpd_start_attempt.failed | default(false)

@@ -1,5 +1,5 @@
 ---
 - name: restart tftp
-  service:
-    name: tftpd-hpa
-    state: restarted
+  set_fact:
+    tftpd_require_restart: True
+  listen: "restart_netboot_services"
