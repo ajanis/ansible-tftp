@@ -4,6 +4,7 @@ tftp_pkg:
   - syslinux
   - pxelinux
   - ipxe
+  - nmap
 
 tftp_service: tftpd-hpa
 
