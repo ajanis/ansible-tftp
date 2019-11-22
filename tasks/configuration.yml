@@ -44,7 +44,7 @@
 
 - name: Restart the tftpd service
   systemd:
-    name: "{{ tftp_service }"
+    name: "{{ tftp_service }}"
     state: restarted
     enabled: yes
   register: tftpd_hpa_restarted
