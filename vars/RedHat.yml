@@ -3,6 +3,7 @@ tftp_pkg:
   - tftp-server
   - xinetd
   - syslinux
+  - ipxe-bootimgs
 
 tftp_service: xinetd
 
