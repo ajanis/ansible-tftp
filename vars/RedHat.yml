@@ -8,17 +8,17 @@ tftp_pkg:
 tftp_service: xinetd
 
 tftp_syslinux_binary:
-  - /usr/share/syslinux/pxelinux.0
-  - /usr/share/syslinux/gpxelinux.0
-  - /usr/share/syslinux/menu.c32
-  - /usr/share/syslinux/chain.c32
-  - /usr/share/ipxe/undionly.kpxe
-  - /usr/share/ipxe/ipxe.efi
-  - /usr/share/ipxe/ipxe.lkrn
-  - /usr/share/syslinux/ldlinux.c32
-  - /usr/share/syslinux/libutil.c32
-  - /usr/share/syslinux/libcom.c32
-  - /usr/share/syslinux/memdisk
+  - pxelinux.0
+  - gpxelinux.0
+  - menu.c32
+  - chain.c32
+  - undionly.kpxe
+  - ipxe.efi
+  - ipxe.lkrn
+  - ldlinux.c32
+  - libutil.c32
+  - libcom.c32
+  - memdisk
 
 
 
