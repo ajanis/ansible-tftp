@@ -17,7 +17,7 @@ tftp_syslinux_binary:
   - ipxe.lkrn
   - ldlinux.c32
   - libutil.c32
-  - libcom.c32
+  - libcom32.c32
   - memdisk
 
 
