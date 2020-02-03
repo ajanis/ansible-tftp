@@ -1,0 +1,13 @@
+[Unit]
+Description=Tftp Server
+Requires=tftp.socket
+Documentation=man:in.tftpd
+
+[Service]
+ExecStart=
+ExecStart={{ tftp_xinetd_server }} {{ tftp_xinetd_server_args }}
+StandardInput=socket
+
+[Install]
+WantedBy=multi-user.target
+Also=tftp.socket
