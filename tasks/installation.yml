@@ -1,4 +1,14 @@
 ---
+- name: Disable SELinux
+  selinux:
+    state: disabled
+  when:
+    - ansible_os_family == "RedHat"
+
+- name: Set FirewallD public zone to allow-all
+  command: firewall-cmd --permanent --zone=public --set-target=ACCEPT
+  when:
+    - ansible_os_family == "RedHat"
 
 - name: Create TFTP system group
   group:
