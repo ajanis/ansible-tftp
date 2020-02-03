@@ -13,10 +13,10 @@
     - ansible_os_family == "RedHat"
 
 - name: Set FirewallD public zone to allow-all
-  command: firewall-cmd --permanent --zone=public --set-target=ACCEPT
+  command: firewall-cmd --permanent --set-target=ACCEPT
   when:
     - firewalld_public_target.stdout != "ACCEPT"
-    - ansible_os_family == "RedHat"
+    - ansible_os_family == "RedHat""
 
 - name: Create TFTP system group
   group:
