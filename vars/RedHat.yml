@@ -20,12 +20,12 @@ tftp_syslinux_binary:
   - libcom32.c32
   - memdisk
 
+tftp_dir: /var/lib/tftpboot
 
-
-tftp_xinetd_socket_type: "dgram"
-tftp_xinetd_protocol: "udp"
+tftp_xinetd_socket_type: dgram
+tftp_xinetd_protocol: udp
 tftp_xinetd_wait: "yes"
-tftp_xinetd_service_user: "root"
-tftp_xinetd_server: "/usr/sbin/in.tftpd"
-tftp_xinetd_server_args: "-c -s /tftpboot"
+tftp_xinetd_service_user: root
+tftp_xinetd_server: /usr/sbin/in.tftpd
+tftp_xinetd_server_args: "--user {{ tftp_user }} -c --secure {{ tftp_dir }}"
 tftp_xinetd_disable: "no"
