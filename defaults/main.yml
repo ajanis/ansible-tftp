@@ -18,3 +18,8 @@ tftp_xinetd_service_user: root
 tftp_xinetd_server: /usr/sbin/in.tftpd
 tftp_xinetd_server_args: "--user {{ tftp_user }} -c --secure {{ tftp_dir }}"
 tftp_xinetd_disable: "no"
+
+tftp_allowed_ports:
+  - "67-69/udp"
+  - "80/tcp"
+  - "443/tcp"
